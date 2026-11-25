@@ -3,8 +3,10 @@ name: Actualizar datos y publicar
 on:
   schedule:
     # Horas en UTC. Chile (verano) = UTC-3.
-    - cron: "30 21 * * 1-5"   # 18:30 Chile, después del cierre de EE.UU.
-    - cron: "0 12 * * *"      # 09:00 Chile, datos macro de la mañana (y cripto el fin de semana)
+    - cron: "*/15 12-21 * * 1-5"  # cada 15 min, 09:00–18:45 Chile, días hábiles (mercados abiertos)
+    - cron: "30 22 * * 1-5"       # 19:30 Chile, cierre definitivo de EE.UU.
+    - cron: "0 */4 * * 0,6"       # fin de semana cada 4 h (cripto)
+    # Nota: GitHub puede atrasar los cron programados algunos minutos en horas de alta carga.
   workflow_dispatch: {}        # botón "Run workflow" para correrlo a mano
   push:
     branches: [main]
