@@ -33,7 +33,7 @@ series:
   - {id: SHCOMP,  name: Shanghai Composite,  cat: Renta variable, src: yahoo, code: "000001.SS", unit: pts}
   - {id: IBOV,    name: Bovespa,             cat: Renta variable, src: yahoo, code: "^BVSP",     unit: pts}
   - {id: MEXBOL,  name: IPC México,          cat: Renta variable, src: yahoo, code: "^MXX",      unit: pts}
-  - {id: IPSA,    name: S&P IPSA,            cat: Renta variable, src: yahoo, code: "^IPSA",     unit: pts}
+  - {id: ECH,     name: MSCI Chile (ETF ECH), cat: Renta variable, src: yahoo, code: "ECH",       unit: USD}
   - {id: EEM,     name: MSCI EM (ETF EEM),   cat: Renta variable, src: yahoo, code: "EEM",       unit: USD}
   - {id: VIX,     name: VIX,                 cat: Volatilidad,    src: yahoo, code: "^VIX",      unit: pts}
   - {id: MOVE,    name: MOVE (vol. bonos),   cat: Volatilidad,    src: yahoo, code: "^MOVE",     unit: pts}
