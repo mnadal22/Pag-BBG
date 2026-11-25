@@ -20,18 +20,26 @@ web/index.html            ← interfaz (monitor + gráfico)
    - Banco Central: crea una cuenta en la BDE y, en "Acceso a la API", aprieta **Habilitar API**
      (https://si3.bcentral.cl/estadisticas/Principal1/Web_Services/index.htm).
 
-2. **Sube esta carpeta a un repositorio nuevo en GitHub** (rama `main`).
-   Con una cuenta gratis, Pages necesita que el repo sea **público**. Con GitHub Pro, que viene gratis en el GitHub Student Developer Pack, puede ser privado.
+2. **Configura los secretos** en *Settings → Secrets and variables → Actions → Secrets*:
+   `FRED_API_KEY`, `BCCH_USER` (tu correo de la BDE) y `BCCH_PASS`.
 
-3. **Configura los secretos** en *Settings → Secrets and variables → Actions*:
-   - Pestaña **Secrets**: `FRED_API_KEY`, `BCCH_USER` (tu correo de la BDE) y `BCCH_PASS`.
-   - Pestaña **Variables**: `SITE_URL` = la URL de tu sitio, por ejemplo `https://tuusuario.github.io/terminal`.
-     Esta es opcional: si una fuente falla, el proceso reutiliza la última versión publicada de esa serie.
+3. **Haz público el repo:** *Settings → General → Danger Zone → Change visibility*.
+   Con una cuenta gratis, Pages solo funciona en repos públicos.
 
 4. **Activa Pages:** en *Settings → Pages → Source*, elige **GitHub Actions**.
 
-5. **Primera corrida:** en *Actions → "Actualizar datos y publicar"*, aprieta **Run workflow**.
-   Al terminar, el sitio queda en la URL de Pages. Desde ahí se actualiza solo.
+5. **Opcional:** en *Settings → Secrets and variables → Actions → Variables*, crea
+   `SITE_URL` = `https://mnadal22.github.io/Pag-BBG`. Así, si una fuente falla, se reutiliza la última versión publicada.
+
+6. **Primera corrida:** en *Actions → "Actualizar datos y publicar"*, aprieta **Run workflow**.
+   Al terminar, el sitio queda en https://mnadal22.github.io/Pag-BBG y desde ahí se actualiza solo.
+
+### Modo privado (opcional)
+
+Si algún día quieres dejar de publicar, crea la variable `PUBLISH` = `false`.
+El workflow sigue bajando los datos, pero deja el sitio solo como archivo descargable
+(*Actions* → corrida → **Artifacts** → `sitio`). Para verlo, descomprímelo, corre
+`python -m http.server 8000` dentro de la carpeta y abre http://localhost:8000.
 
 ## Agregar indicadores
 

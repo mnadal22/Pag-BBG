@@ -44,12 +44,22 @@ jobs:
       - name: Copiar la interfaz
         run: cp -r web/. site/
 
-      - uses: actions/upload-pages-artifact@v5
+      # Modo privado: el sitio queda como archivo descargable en la corrida (Actions → corrida → Artifacts)
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sitio
+          path: site
+          retention-days: 7
+
+      # Publica en Pages salvo que la variable del repo PUBLISH = false
+      - if: vars.PUBLISH != 'false'
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
   deploy:
     needs: build
+    if: vars.PUBLISH != 'false'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
