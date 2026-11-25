@@ -41,6 +41,29 @@ El workflow sigue bajando los datos, pero deja el sitio solo como archivo descar
 (*Actions* → corrida → **Artifacts** → `sitio`). Para verlo, descomprímelo, corre
 `python -m http.server 8000` dentro de la carpeta y abre http://localhost:8000.
 
+## Backend en vivo (cualquier ticker + fundamentals)
+
+La carpeta `worker/` tiene una API gratuita en **Cloudflare Workers** que consulta Yahoo Finance en el momento:
+búsqueda de cualquier acción, ETF, moneda, índice o futuro del mundo; precios intradía; PER, market cap,
+earnings, márgenes, dividendos, analistas y principales posiciones de ETFs. Responde con caché (30 s a 1 h).
+
+Configuración (una vez):
+1. Crea una cuenta gratis en https://dash.cloudflare.com. En *Workers & Pages*, elige tu subdominio `*.workers.dev`.
+2. Crea un token: *My Profile → API Tokens → Create Token → plantilla "Edit Cloudflare Workers"*.
+3. Copia tu **Account ID** (aparece en la página de *Workers & Pages*, a la derecha).
+4. En GitHub, en *Settings → Secrets and variables → Actions → Secrets*, crea `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
+5. *Actions → "Desplegar API (Cloudflare Worker)" → Run workflow*. Al final del log aparece la URL, del tipo
+   `https://pag-bbg-api.<tu-subdominio>.workers.dev`.
+6. En *Variables*, crea `API_URL` con esa URL y corre "Actualizar datos y publicar".
+
+Sin `API_URL`, la página funciona igual, pero solo con el catálogo.
+
+Uso en la página:
+- Escribe un ticker o un nombre en el buscador: `AAPL`, `SQM-B.SN`, `EURCLP=X`, `GC=F`, `^GSPC`, `bitcoin`.
+- **+ Mi lista** agrega el ticker al monitor, con precio en vivo actualizado cada minuto. La lista se guarda en tu navegador.
+- Rangos `1D` y `5D` intradía (se refrescan solos). Estudios: media, ±1/2/3σ, MM20/50/200, Bollinger, tendencia y volumen.
+- Sufijos de bolsa: `.SN` Santiago, `.SA` Brasil, `.MX` México, `.L` Londres, `.TO` Toronto, `=X` monedas, `=F` futuros.
+
 ## Agregar indicadores
 
 Agrega una línea a `catalog/indicators.yaml` y haz push. El workflow corre solo.

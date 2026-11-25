@@ -44,7 +44,11 @@ jobs:
         run: python -m ingest.run --catalog catalog/indicators.yaml --out site/data
 
       - name: Copiar la interfaz
-        run: cp -r web/. site/
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          cp -r web/. site/
+          echo "window.API_URL='${API_URL}';" > site/config.js
 
       # Modo privado: el sitio queda como archivo descargable en la corrida (Actions → corrida → Artifacts)
       - uses: actions/upload-artifact@v7

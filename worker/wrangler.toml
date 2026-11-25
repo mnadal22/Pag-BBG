@@ -1,0 +1,9 @@
+name = "pag-bbg-api"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[vars]
+# Cuando la página esté publicada, puedes restringir quién usa la API:
+# ALLOWED_ORIGIN = "https://mnadal22.github.io"
+ALLOWED_ORIGIN = "*"
