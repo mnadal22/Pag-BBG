@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal · Monitor</title>
+<style>
+  :root{
+    --bg:#000; --panel:#0a0a0a; --line:#262626; --text:#e6e6e6; --dim:#8a8a8a;
+    --amber:#ffa028; --up:#20c95a; --down:#ff4040; --sel:#1a1306;
+    --font:"IBM Plex Mono","JetBrains Mono",Consolas,monospace; --fs:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:var(--fs)/1.35 var(--font)}
+  header{display:flex;gap:12px;align-items:center;padding:6px 10px;background:var(--amber);color:#000;font-weight:700}
+  header input{flex:1;max-width:420px;background:#000;color:var(--amber);border:0;padding:4px 8px;font:inherit;text-transform:uppercase}
+  header .meta{margin-left:auto;font-weight:400}
+  main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:1px;background:var(--line);height:calc(100vh - 34px)}
+  section{background:var(--panel);overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  th{position:sticky;top:0;background:#141414;color:var(--amber);text-align:right;padding:3px 6px;font-weight:600;border-bottom:1px solid var(--line)}
+  th:first-child,th:nth-child(2),td:first-child,td:nth-child(2){text-align:left}
+  td{padding:2px 6px;text-align:right;white-space:nowrap;border-bottom:1px solid #111}
+  tr.cat td{color:var(--amber);background:#0f0b04;font-weight:700;padding-top:6px}
+  tr.row{cursor:pointer} tr.row:hover td{background:#111} tr.row.sel td{background:var(--sel)}
+  td.id{color:var(--amber)} .up{color:var(--up)} .down{color:var(--down)} .dim{color:var(--dim)}
+  #chart{padding:10px}
+  #chart h2{margin:0 0 4px;color:var(--amber);font-size:14px}
+  .btns button{background:#141414;color:var(--text);border:1px solid var(--line);font:inherit;padding:2px 8px;cursor:pointer}
+  .btns button.on{background:var(--amber);color:#000}
+  svg text{fill:var(--dim);font:10px var(--font)}
+  @media (max-width:900px){main{grid-template-columns:1fr;height:auto}}
+</style>
+</head>
+<body>
+<header>
+  <span>MONITOR</span>
+  <input id="cmd" placeholder="Buscar: SPX, cobre, UST…  (Enter abre el gráfico)" autocomplete="off">
+  <span class="meta" id="meta">cargando…</span>
+</header>
+<main>
+  <section><table id="tbl"><thead><tr>
+    <th>ID</th><th>Indicador</th><th>Último</th><th>Δ ant.</th><th>1S</th><th>1M</th><th>YTD</th><th>1A</th><th>z 1A</th><th>Fecha</th>
+  </tr></thead><tbody></tbody></table></section>
+  <section id="chart"><h2>Selecciona un indicador</h2></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let CAT = {}, ROWS = [], SEL = null, RANGE = "1A";
+const fmt = (v, d=2) => v==null ? "—" : v.toLocaleString("es-CL",{minimumFractionDigits:d,maximumFractionDigits:d});
+const chg = (v, kind) => {
+  if (v==null) return '<span class="dim">—</span>';
+  const cls = v>0 ? "up" : v<0 ? "down" : "dim";
+  const txt = kind==="abs" ? (v>0?"+":"")+fmt(v, 2) : (v>0?"+":"")+fmt(v,2)+"%";
+  return `<span class="${cls}">${txt}</span>`;
+};
+
+async function load(){
+  const [c, s] = await Promise.all([fetch("data/catalog.json").then(r=>r.json()), fetch("data/snapshot.json").then(r=>r.json())]);
+  c.indicators.forEach(i => CAT[i.id] = i);
+  const catOrder = [...new Set(c.indicators.map(i => i.cat))];
+  const pos = Object.fromEntries(c.indicators.map((i, k) => [i.id, k]));
+  ROWS = s.rows.map(r => ({...CAT[r.id], ...r, lastDate: CAT[r.id].last}))
+    .sort((a, b) => catOrder.indexOf(a.cat) - catOrder.indexOf(b.cat) || pos[a.id] - pos[b.id]);
+  const bad = c.indicators.filter(i => i.status !== "ok").length;
+  $("#meta").textContent = `${ROWS.length} indicadores · actualizado ${new Date(s.generated).toLocaleString("es-CL")}` + (bad?` · ${bad} con aviso`:"");
+  render();
+}
+
+function render(q=""){
+  q = q.trim().toLowerCase();
+  const rows = ROWS.filter(r => !q || r.id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q) || r.cat.toLowerCase().includes(q));
+  let html = "", cat = null;
+  for (const r of rows){
+    if (r.cat !== cat){ cat = r.cat; html += `<tr class="cat"><td colspan="10">${cat}</td></tr>`; }
+    html += `<tr class="row${r.id===SEL?" sel":""}" data-id="${r.id}">
+      <td class="id">${r.id}</td><td>${r.name} <span class="dim">${r.unit||""}</span>${r.status!=="ok"?' <span class="down" title="'+r.status+'">●</span>':""}</td>
+      <td>${fmt(r.last, r.dec)}</td><td>${chg(r.d1,r.chg_kind)}</td><td>${chg(r.w1,r.chg_kind)}</td><td>${chg(r.m1,r.chg_kind)}</td>
+      <td>${chg(r.ytd,r.chg_kind)}</td><td>${chg(r.y1,r.chg_kind)}</td><td>${fmt(r.z1y,1)}</td><td class="dim">${r.date}</td></tr>`;
+  }
+  $("#tbl tbody").innerHTML = html;
+  return rows;
+}
+
+const RANGES = {"1M":1/12,"6M":.5,"1A":1,"5A":5,"10A":10,"MAX":99};
+async function chart(id){
+  SEL = id; render($("#cmd").value);
+  const m = CAT[id], j = await fetch(`data/series/${id}.json`).then(r=>r.json());
+  const cut = new Date(j.d[j.d.length-1]); cut.setDate(cut.getDate() - RANGES[RANGE]*365);
+  const pts = j.d.map((d,i)=>[new Date(d), j.v[i]]).filter(p => p[0] >= cut && p[1]!=null);
+  const W=600,H=320,P=48, xs=pts.map(p=>+p[0]), ys=pts.map(p=>p[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const X=t=>P+(t-x0)/(x1-x0||1)*(W-P-8), Y=v=>H-20-(v-y0)/(y1-y0||1)*(H-40);
+  const path = pts.map((p,i)=>(i?"L":"M")+X(+p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join("");
+  const grid = [0,.25,.5,.75,1].map(f=>{const v=y0+(y1-y0)*f;return `<line x1="${P}" x2="${W-8}" y1="${Y(v)}" y2="${Y(v)}" stroke="#1c1c1c"/><text x="4" y="${Y(v)+3}">${fmt(v,m.dec)}</text>`}).join("");
+  const up = ys[ys.length-1] >= ys[0];
+  $("#chart").innerHTML = `<h2>${id} · ${m.name}</h2>
+    <div class="dim">${m.src}${m.code?":"+m.code:""} · ${m.unit||""} · ${pts.length} obs</div>
+    <div class="btns" style="margin:8px 0">${Object.keys(RANGES).map(r=>`<button class="${r===RANGE?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%">${grid}
+      <path d="${path}" fill="none" stroke="${up?"var(--up)":"var(--down)"}" stroke-width="1.4"/>
+      <text x="${P}" y="${H-4}">${pts[0][0].toISOString().slice(0,10)}</text>
+      <text x="${W-8}" y="${H-4}" text-anchor="end">${pts[pts.length-1][0].toISOString().slice(0,10)}</text></svg>`;
+  document.querySelectorAll(".btns button").forEach(b => b.onclick = () => { RANGE = b.dataset.r; chart(id); });
+}
+
+$("#tbl").addEventListener("click", e => { const tr = e.target.closest("tr.row"); if (tr) chart(tr.dataset.id); });
+$("#cmd").addEventListener("input", e => render(e.target.value));
+$("#cmd").addEventListener("keydown", e => {
+  if (e.key === "Enter"){ const rows = render(e.target.value); if (rows.length) chart(rows[0].id); }
+});
+document.addEventListener("keydown", e => { if (e.key === "/" && document.activeElement !== $("#cmd")){ e.preventDefault(); $("#cmd").focus(); } });
+load().catch(err => $("#meta").textContent = "Error cargando datos: " + err);
+</script>
+</body>
+</html>

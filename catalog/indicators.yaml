@@ -1,0 +1,117 @@
+# Catálogo de indicadores.
+# Para agregar uno: añade una entrada y haz push. El workflow lo bajará solo.
+#
+# Campos de "series":
+#   id    : identificador corto, único (se usa en la barra de comandos y en los archivos)
+#   name  : nombre visible
+#   cat   : categoría (agrupa en la interfaz)
+#   src   : fred | bcch | yahoo
+#   code  : código en la fuente (FRED series_id, código BDE del BCCh, ticker de Yahoo)
+#   unit  : unidad. Si es "%" o "pb", las variaciones se muestran en diferencia absoluta;
+#           si no, en % de variación.
+#   dec   : decimales a mostrar (opcional, por defecto 2)
+#
+# Campos de "derived" (se calculan a partir de otros ids, incluso de otros derivados):
+#   op    : spread (a - b) | ratio (a / b) | yoy (variación % a 12 meses de a)
+#   args  : [a, b] o [a]
+#   scale : multiplicador opcional (p. ej. 100 para pasar de % a pb)
+
+defaults:
+  start: "2000-01-01"
+
+series:
+  # ---------------- Renta variable ----------------
+  - {id: SPX,     name: S&P 500,             cat: Renta variable, src: yahoo, code: "^GSPC",     unit: pts}
+  - {id: NDX,     name: Nasdaq 100,          cat: Renta variable, src: yahoo, code: "^NDX",      unit: pts}
+  - {id: INDU,    name: Dow Jones,           cat: Renta variable, src: yahoo, code: "^DJI",      unit: pts}
+  - {id: RTY,     name: Russell 2000,        cat: Renta variable, src: yahoo, code: "^RUT",      unit: pts}
+  - {id: SX5E,    name: Euro Stoxx 50,       cat: Renta variable, src: yahoo, code: "^STOXX50E", unit: pts}
+  - {id: DAX,     name: DAX,                 cat: Renta variable, src: yahoo, code: "^GDAXI",    unit: pts}
+  - {id: UKX,     name: FTSE 100,            cat: Renta variable, src: yahoo, code: "^FTSE",     unit: pts}
+  - {id: NKY,     name: Nikkei 225,          cat: Renta variable, src: yahoo, code: "^N225",     unit: pts}
+  - {id: HSI,     name: Hang Seng,           cat: Renta variable, src: yahoo, code: "^HSI",      unit: pts}
+  - {id: SHCOMP,  name: Shanghai Composite,  cat: Renta variable, src: yahoo, code: "000001.SS", unit: pts}
+  - {id: IBOV,    name: Bovespa,             cat: Renta variable, src: yahoo, code: "^BVSP",     unit: pts}
+  - {id: MEXBOL,  name: IPC México,          cat: Renta variable, src: yahoo, code: "^MXX",      unit: pts}
+  - {id: IPSA,    name: S&P IPSA,            cat: Renta variable, src: yahoo, code: "^IPSA",     unit: pts}
+  - {id: EEM,     name: MSCI EM (ETF EEM),   cat: Renta variable, src: yahoo, code: "EEM",       unit: USD}
+  - {id: VIX,     name: VIX,                 cat: Volatilidad,    src: yahoo, code: "^VIX",      unit: pts}
+  - {id: MOVE,    name: MOVE (vol. bonos),   cat: Volatilidad,    src: yahoo, code: "^MOVE",     unit: pts}
+
+  # ---------------- Monedas ----------------
+  - {id: DXY,     name: Índice dólar (DXY),  cat: Monedas, src: yahoo, code: "DX-Y.NYB", unit: pts}
+  - {id: EURUSD,  name: EUR/USD,             cat: Monedas, src: yahoo, code: "EURUSD=X", unit: USD, dec: 4}
+  - {id: GBPUSD,  name: GBP/USD,             cat: Monedas, src: yahoo, code: "GBPUSD=X", unit: USD, dec: 4}
+  - {id: USDJPY,  name: USD/JPY,             cat: Monedas, src: yahoo, code: "JPY=X",    unit: JPY}
+  - {id: USDCNY,  name: USD/CNY,             cat: Monedas, src: yahoo, code: "CNY=X",    unit: CNY, dec: 4}
+  - {id: USDBRL,  name: USD/BRL,             cat: Monedas, src: yahoo, code: "BRL=X",    unit: BRL, dec: 4}
+  - {id: USDMXN,  name: USD/MXN,             cat: Monedas, src: yahoo, code: "MXN=X",    unit: MXN, dec: 4}
+  - {id: USDCLP,  name: USD/CLP (mercado),   cat: Monedas, src: yahoo, code: "CLP=X",    unit: CLP}
+
+  # ---------------- Materias primas ----------------
+  - {id: HG,      name: Cobre (COMEX),       cat: Materias primas, src: yahoo, code: "HG=F", unit: USD/lb, dec: 3}
+  - {id: GC,      name: Oro,                 cat: Materias primas, src: yahoo, code: "GC=F", unit: USD/oz}
+  - {id: SI,      name: Plata,               cat: Materias primas, src: yahoo, code: "SI=F", unit: USD/oz}
+  - {id: CL,      name: Petróleo WTI,        cat: Materias primas, src: yahoo, code: "CL=F", unit: USD/bbl}
+  - {id: CO,      name: Petróleo Brent,      cat: Materias primas, src: yahoo, code: "BZ=F", unit: USD/bbl}
+  - {id: NG,      name: Gas natural,         cat: Materias primas, src: yahoo, code: "NG=F", unit: USD/MMBtu, dec: 3}
+
+  # ---------------- Cripto ----------------
+  - {id: BTC,     name: Bitcoin,             cat: Cripto, src: yahoo, code: "BTC-USD", unit: USD}
+  - {id: ETH,     name: Ethereum,            cat: Cripto, src: yahoo, code: "ETH-USD", unit: USD}
+
+  # ---------------- Tasas EE.UU. (FRED) ----------------
+  - {id: FEDFUNDS, name: Fed Funds efectiva,   cat: Tasas EE.UU., src: fred, code: DFF,          unit: "%"}
+  - {id: SOFR,     name: SOFR,                 cat: Tasas EE.UU., src: fred, code: SOFR,         unit: "%"}
+  - {id: UST3M,    name: Tesoro 3M,            cat: Tasas EE.UU., src: fred, code: DGS3MO,       unit: "%"}
+  - {id: UST2Y,    name: Tesoro 2Y,            cat: Tasas EE.UU., src: fred, code: DGS2,         unit: "%"}
+  - {id: UST5Y,    name: Tesoro 5Y,            cat: Tasas EE.UU., src: fred, code: DGS5,         unit: "%"}
+  - {id: UST10Y,   name: Tesoro 10Y,           cat: Tasas EE.UU., src: fred, code: DGS10,        unit: "%"}
+  - {id: UST30Y,   name: Tesoro 30Y,           cat: Tasas EE.UU., src: fred, code: DGS30,        unit: "%"}
+  - {id: TIPS10Y,  name: Tasa real 10Y (TIPS), cat: Tasas EE.UU., src: fred, code: DFII10,       unit: "%"}
+  - {id: BE10Y,    name: Breakeven 10Y,        cat: Tasas EE.UU., src: fred, code: T10YIE,       unit: "%"}
+  - {id: MORT30,   name: Hipotecaria 30Y,      cat: Tasas EE.UU., src: fred, code: MORTGAGE30US, unit: "%"}
+
+  # ---------------- Crédito (FRED) ----------------
+  - {id: HYOAS,   name: Spread High Yield (OAS),  cat: Crédito, src: fred, code: BAMLH0A0HYM2, unit: "%"}
+  - {id: IGOAS,   name: Spread Grado Inv. (OAS),  cat: Crédito, src: fred, code: BAMLC0A0CM,   unit: "%"}
+  - {id: NFCI,    name: Cond. financieras (NFCI), cat: Crédito, src: fred, code: NFCI,         unit: idx, dec: 3}
+
+  # ---------------- Macro EE.UU. (FRED) ----------------
+  - {id: CPI,     name: IPC (índice),           cat: Macro EE.UU., src: fred, code: CPIAUCSL, unit: idx}
+  - {id: CORECPI, name: IPC subyacente (índice),cat: Macro EE.UU., src: fred, code: CPILFESL, unit: idx}
+  - {id: COREPCE, name: PCE subyacente (índice),cat: Macro EE.UU., src: fred, code: PCEPILFE, unit: idx}
+  - {id: UNRATE,  name: Desempleo,              cat: Macro EE.UU., src: fred, code: UNRATE,   unit: "%", dec: 1}
+  - {id: NFP,     name: Nóminas no agrícolas,   cat: Macro EE.UU., src: fred, code: PAYEMS,   unit: miles, dec: 0}
+  - {id: CLAIMS,  name: Solicitudes de subsidio,cat: Macro EE.UU., src: fred, code: ICSA,     unit: personas, dec: 0}
+  - {id: INDPRO,  name: Producción industrial,  cat: Macro EE.UU., src: fred, code: INDPRO,   unit: idx}
+  - {id: RETAIL,  name: Ventas minoristas,      cat: Macro EE.UU., src: fred, code: RSAFS,    unit: MM USD, dec: 0}
+  - {id: UMICH,   name: Confianza consumidor (UMich), cat: Macro EE.UU., src: fred, code: UMCSENT, unit: idx, dec: 1}
+  - {id: GDP,     name: PIB real,               cat: Macro EE.UU., src: fred, code: GDPC1,    unit: MMM USD, dec: 0}
+  - {id: M2,      name: M2,                     cat: Macro EE.UU., src: fred, code: M2SL,     unit: MMM USD, dec: 0}
+  - {id: FEDBS,   name: Balance de la Fed,      cat: Macro EE.UU., src: fred, code: WALCL,    unit: MM USD, dec: 0}
+
+  # ---------------- Chile (Banco Central, API BDE) ----------------
+  # Para buscar más códigos: https://si3.bcentral.cl/estadisticas/Principal1/Web_Services/index.htm
+  # (o en Python: bcchapi.Siete(...).buscar("palabra"))
+  - {id: CLDOLOBS, name: Dólar observado,   cat: Chile, src: bcch, code: F073.TCO.PRE.Z.D,              unit: CLP}
+  - {id: CLEURO,   name: Euro (BCCh),       cat: Chile, src: bcch, code: F072.CLP.EUR.N.O.D,            unit: CLP}
+  - {id: CLUF,     name: UF,                cat: Chile, src: bcch, code: F073.UFF.PRE.Z.D,              unit: CLP}
+  - {id: CLTPM,    name: TPM,               cat: Chile, src: bcch, code: F022.TPM.TIN.D001.NO.Z.D,      unit: "%"}
+  - {id: CLIMACEC, name: IMACEC (índice),   cat: Chile, src: bcch, code: F032.IMC.IND.Z.Z.EP18.Z.Z.0.M, unit: idx}
+  - {id: CLCOBRE,  name: Cobre BML (BCCh),  cat: Chile, src: bcch, code: F019.PPB.PRE.100.D,            unit: USc/lb}
+
+derived:
+  - {id: UST2S10S, name: Pendiente 2s10s,      cat: Tasas EE.UU., op: spread, args: [UST10Y, UST2Y], scale: 100, unit: pb, dec: 0}
+  - {id: UST3M10Y, name: Pendiente 3m10y,      cat: Tasas EE.UU., op: spread, args: [UST10Y, UST3M], scale: 100, unit: pb, dec: 0}
+  - {id: UST5S30S, name: Pendiente 5s30s,      cat: Tasas EE.UU., op: spread, args: [UST30Y, UST5Y], scale: 100, unit: pb, dec: 0}
+  - {id: HYIGDIFF, name: HY − IG,              cat: Crédito,      op: spread, args: [HYOAS, IGOAS],  scale: 100, unit: pb, dec: 0}
+  - {id: CPIYOY,   name: Inflación IPC a/a,    cat: Macro EE.UU., op: yoy, args: [CPI],     unit: "%"}
+  - {id: CORECPIYOY, name: IPC subyacente a/a, cat: Macro EE.UU., op: yoy, args: [CORECPI], unit: "%"}
+  - {id: COREPCEYOY, name: PCE subyacente a/a, cat: Macro EE.UU., op: yoy, args: [COREPCE], unit: "%"}
+  - {id: GDPYOY,   name: PIB real a/a,         cat: Macro EE.UU., op: yoy, args: [GDP],     unit: "%"}
+  - {id: M2YOY,    name: M2 a/a,               cat: Macro EE.UU., op: yoy, args: [M2],      unit: "%"}
+  - {id: CLIMACECYOY, name: IMACEC a/a,        cat: Chile,        op: yoy, args: [CLIMACEC], unit: "%"}
+  - {id: CUAU,     name: Ratio cobre/oro,      cat: Materias primas, op: ratio, args: [HG, GC], scale: 1000, unit: x1000, dec: 3}
+  - {id: SPXGOLD,  name: S&P 500 / oro,        cat: Renta variable, op: ratio, args: [SPX, GC], unit: x, dec: 3}
+  - {id: WTIBRENT, name: Brent − WTI,          cat: Materias primas, op: spread, args: [CO, CL], unit: USD/bbl}
